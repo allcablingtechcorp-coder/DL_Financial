@@ -33,6 +33,8 @@
             .no-print { display: none !important; }
             body { background-color: white !important; }
             .print-shadow-none { box-shadow: none !important; border: 1px solid #e5e7eb; }
+            .page-break-avoid { break-inside: avoid; }
+            @page { margin: 1.5cm; }
         }
         ::-webkit-scrollbar { height: 8px; width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; rounded: 4px; }
@@ -250,39 +252,26 @@
             </form>
         </div>
 
-        <!-- Table Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden print-shadow-none">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center flex-wrap gap-4">
-                <div class="relative w-full md:w-64 no-print">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+        <!-- Detailed Reports Section -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-6 no-print">
+                <h2 class="text-xl font-bold text-gray-800" id="lblDetailedReports">Detailed Reports (1099)</h2>
+                <div class="flex gap-4">
+                    <div class="relative w-full md:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchInput" onkeyup="window.renderTable()" class="w-full pl-10 p-2 bg-white border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 shadow-sm" placeholder="Search...">
                     </div>
-                    <input type="text" id="searchInput" onkeyup="window.renderTable()" class="w-full pl-10 p-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-brand-500" placeholder="Search...">
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap">
+                        <i class="fa-solid fa-file-pdf"></i> <span id="txtReport">Export PDF</span>
+                    </button>
                 </div>
-                <button onclick="window.print()" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-file-pdf"></i> <span id="txtReport">Generate Executive Report</span>
-                </button>
             </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider border-b">
-                            <th class="p-4 font-semibold" id="colDate">Date</th>
-                            <th class="p-4 font-semibold" id="colPerson">Person</th>
-                            <th class="p-4 font-semibold" id="colProject">Project</th>
-                            <th class="p-4 font-semibold text-right" id="colValue">Value</th>
-                            <th class="p-4 font-semibold text-center no-print" id="colActions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-100 text-gray-700 text-sm">
-                        <!-- Rows injected via JS -->
-                    </tbody>
-                </table>
-            </div>
-            <div id="emptyState" class="hidden p-8 text-center text-gray-500">
-                <i class="fa-solid fa-folder-open text-4xl mb-3 text-gray-300"></i>
-                <p id="txtEmpty">No entries found in Cloud.</p>
+
+            <!-- Container for Dynamically Generated Tables -->
+            <div id="entriesContainer" class="flex flex-col gap-8">
+                <!-- Tables injected via JS -->
             </div>
         </div>
 
@@ -291,7 +280,6 @@
     <!-- FIREBASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Import added Email/Password Auth functions and signInAnonymously
         import { getAuth, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, signInWithCustomToken, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -340,36 +328,34 @@
                 lblChartComparison: "Revenue Comparison", lblChartTrend: "Revenue Trend", lblNewEntry: "New Entry / Edit",
                 lblPerson: "Person", lblValue: "Value ($)", lblProject: "Project / Client", lblDate: "Date",
                 txtAdd: "Add Entry", txtUpdate: "Update Entry", txtAddBoth: "Add for Both", txtCancel: "Cancel", txtSearch: "Search records...",
-                txtReport: "Generate Report (PDF)", colDate: "Date", colPerson: "Person", colProject: "Project", colValue: "Value", colActions: "Actions", txtEmpty: "No entries found in Cloud.",
+                txtReport: "Export PDF", colDate: "Date", colProject: "Project Description", colValue: "Value", colActions: "Actions", txtEmpty: "No entries found for the selected criteria.",
                 lblLoginTitle: "Secure Login", lblLoginSub: "D&L Financial Dashboard", lblEmail: "Email Address", lblPassword: "Password", btnLoginBtn: "Sign In", txtLoginError: "Invalid email or password.", txtLogout: "Logout", txtLoading: "Connecting to Cloud...",
                 lblForgotPwd: "Forgot Password?", txtResetSent: "Password reset email sent! Check your inbox.", txtEnterEmail: "Please enter your email address first.",
-                lblDashboardOverview: "Dashboard Overview", lblYearFilter: "Year:"
+                lblDashboardOverview: "Dashboard Overview", lblYearFilter: "Year:", lblDetailedReports: "Detailed Reports (1099)",
+                lblLedger: "1099 Ledger", lblTotal: "Total"
             },
             pt: {
                 appTitle: "Financeiro D&L - Consolidado 1099", lblDanteTotal: "Total Dante", lblLeoTotal: "Total Leonardo", lblCombinedTotal: "Total Combinado",
                 lblChartComparison: "Comparativo de Receitas", lblChartTrend: "Tendência de Receitas", lblNewEntry: "Novo Lançamento / Editar",
                 lblPerson: "Pessoa", lblValue: "Valor ($)", lblProject: "Projeto / Cliente", lblDate: "Data",
                 txtAdd: "Adicionar", txtUpdate: "Atualizar", txtAddBoth: "Para Ambos", txtCancel: "Cancelar", txtSearch: "Buscar lançamentos...",
-                txtReport: "Gerar Relatório (PDF)", colDate: "Data", colPerson: "Pessoa", colProject: "Projeto", colValue: "Valor", colActions: "Ações", txtEmpty: "Nenhum lançamento encontrado na Nuvem.",
+                txtReport: "Exportar PDF", colDate: "Data", colProject: "Descrição do Projeto", colValue: "Valor", colActions: "Ações", txtEmpty: "Nenhum lançamento encontrado para os critérios selecionados.",
                 lblLoginTitle: "Acesso Seguro", lblLoginSub: "Painel Financeiro D&L", lblEmail: "Endereço de E-mail", lblPassword: "Senha", btnLoginBtn: "Entrar", txtLoginError: "E-mail ou senha inválidos.", txtLogout: "Sair", txtLoading: "Conectando à Nuvem...",
                 lblForgotPwd: "Esqueceu a senha?", txtResetSent: "E-mail de recuperação enviado! Verifique sua caixa de entrada.", txtEnterEmail: "Por favor, digite seu e-mail primeiro.",
-                lblDashboardOverview: "Visão Geral do Painel", lblYearFilter: "Ano:"
+                lblDashboardOverview: "Visão Geral do Painel", lblYearFilter: "Ano:", lblDetailedReports: "Relatórios Detalhados (1099)",
+                lblLedger: "Livro-Razão 1099", lblTotal: "Total"
             }
         };
 
         // --- AUTHENTICATION LOGIC ---
-
-        // Listen for Auth changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Logged IN
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
                 document.getElementById('loader').classList.remove('hidden-loader');
                 
                 if (unsubscribeSnapshot) unsubscribeSnapshot();
                 
-                // Listen to Realtime Cloud Updates
                 unsubscribeSnapshot = onSnapshot(colRef, 
                     (snapshot) => {
                         entries = [];
@@ -386,7 +372,6 @@
                     }
                 );
             } else {
-                // Logged OUT
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
                 document.getElementById('loader').classList.add('hidden-loader');
@@ -396,14 +381,12 @@
                     unsubscribeSnapshot = null;
                 }
                 
-                // Clear UI data securely
                 entries = [];
                 updateDashboard();
                 window.renderTable();
             }
         });
 
-        // Handle Login Form Submit
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -417,11 +400,8 @@
 
             try {
                 if (typeof __firebase_config !== 'undefined') {
-                    // Bypass para o ambiente de preview da IA: O banco de dados temporário 
-                    // da pré-visualização não tem o Login por Email ativado, então simulamos.
                     await signInAnonymously(auth);
                 } else {
-                    // Ambiente Real de Produção (GitHub): Utiliza a senha que você configurou.
                     await signInWithEmailAndPassword(auth, email, password);
                 }
                 document.getElementById('loginForm').reset();
@@ -433,7 +413,6 @@
             }
         });
 
-        // Toggle Password Visibility
         window.togglePassword = () => {
             const pwdInput = document.getElementById('loginPassword');
             const eyeIcon = document.getElementById('eyeIcon');
@@ -446,7 +425,6 @@
             }
         };
 
-        // Password Reset Function
         window.resetPassword = async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -476,35 +454,24 @@
             }
         };
 
-        // Global Logout Function
         window.logout = async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
+            try { await signOut(auth); } catch (error) { console.error("Error signing out:", error); }
         };
 
-        // Initialize App
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('date').valueAsDate = new Date();
-            
-            // Auto-login logic for AI preview environment only
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 try { await signInWithCustomToken(auth, __initial_auth_token); } catch(e) {}
             }
-            
             window.updateYearOptions();
             updateUI();
         });
 
-        // --- GLOBAL FUNCTIONS & UI ---
-        
         window.updateYearOptions = () => {
             const yearSelect = document.getElementById('yearFilter');
             if(!yearSelect) return;
             const years = new Set(entries.map(e => new Date(e.date).getFullYear()));
-            years.add(new Date().getFullYear()); // Always include current year
+            years.add(new Date().getFullYear()); 
             
             const sortedYears = Array.from(years).sort((a, b) => b - a);
             yearSelect.innerHTML = '';
@@ -527,24 +494,19 @@
 
         window.setLanguage = (lang) => {
             currentLang = lang;
-            
-            // Dashboard flags
             document.getElementById('btnEn').classList.replace(lang === 'en' ? 'opacity-50' : 'opacity-100', lang === 'en' ? 'opacity-100' : 'opacity-50');
             document.getElementById('btnPt').classList.replace(lang === 'pt' ? 'opacity-50' : 'opacity-100', lang === 'pt' ? 'opacity-100' : 'opacity-50');
-            
-            // Login flags
             document.getElementById('btnLoginEn').classList.replace(lang === 'en' ? 'opacity-50' : 'opacity-100', lang === 'en' ? 'opacity-100' : 'opacity-50');
             document.getElementById('btnLoginPt').classList.replace(lang === 'pt' ? 'opacity-50' : 'opacity-100', lang === 'pt' ? 'opacity-100' : 'opacity-50');
-            
             updateUI();
         };
 
         const updateUI = () => {
             const t = i18n[currentLang];
-            // Main App
             document.getElementById('appTitle').innerText = t.appTitle;
             document.getElementById('lblDashboardOverview').innerText = t.lblDashboardOverview;
             document.getElementById('lblYearFilter').innerText = t.lblYearFilter;
+            document.getElementById('lblDetailedReports').innerText = t.lblDetailedReports;
             document.getElementById('lblDanteTotal').innerText = t.lblDanteTotal;
             document.getElementById('lblLeoTotal').innerText = t.lblLeoTotal;
             document.getElementById('lblCombinedTotal').innerText = t.lblCombinedTotal;
@@ -559,19 +521,12 @@
             document.getElementById('txtCancel').innerText = t.txtCancel;
             document.getElementById('searchInput').placeholder = t.txtSearch;
             document.getElementById('txtReport').innerText = t.txtReport;
-            document.getElementById('colDate').innerText = t.colDate;
-            document.getElementById('colPerson').innerText = t.colPerson;
-            document.getElementById('colProject').innerText = t.colProject;
-            document.getElementById('colValue').innerText = t.colValue;
-            document.getElementById('colActions').innerText = t.colActions;
-            document.getElementById('txtEmpty').innerText = t.txtEmpty;
             document.getElementById('txtLogout').innerText = t.txtLogout;
             document.getElementById('txtLoading').innerText = t.txtLoading;
             
             const editId = document.getElementById('editId').value;
             document.getElementById('txtAdd').innerText = editId ? t.txtUpdate : t.txtAdd;
 
-            // Login Screen
             document.getElementById('lblLoginTitle').innerText = t.lblLoginTitle;
             document.getElementById('lblLoginSub').innerText = t.lblLoginSub;
             document.getElementById('lblEmail').innerText = t.lblEmail;
@@ -592,7 +547,6 @@
             return currentLang === 'pt' ? `${day}/${month}/${year}` : `${month}/${day}/${year}`;
         };
 
-        // Form Submit (Add / Edit to Cloud)
         document.getElementById('entryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!auth.currentUser) return;
@@ -619,7 +573,6 @@
             }
         });
 
-        // Add for both
         window.addForBoth = async () => {
             const form = document.getElementById('entryForm');
             if(!form.checkValidity()) { form.reportValidity(); return; }
@@ -640,7 +593,6 @@
             } catch(e) { console.error("Error adding both", e); }
         };
 
-        // Edit
         window.editEntry = (id) => {
             const entry = entries.find(x => x.id === id);
             if(!entry) return;
@@ -658,7 +610,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Delete
         window.deleteEntry = async (id) => {
             const msg = currentLang === 'pt' ? 'Tem certeza que deseja excluir?' : 'Are you sure you want to delete this entry?';
             if(confirm(msg)) {
@@ -680,9 +631,10 @@
         };
 
         window.renderTable = () => {
+            const t = i18n[currentLang];
             const queryStr = document.getElementById('searchInput').value.toLowerCase();
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+            const container = document.getElementById('entriesContainer');
+            container.innerHTML = '';
 
             const sortedEntries = [...entries].sort((a, b) => {
                 const dateDiff = new Date(b.date) - new Date(a.date);
@@ -698,22 +650,28 @@
             });
 
             if(filtered.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-            } else {
-                document.getElementById('emptyState').classList.add('hidden');
+                container.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500 print-shadow-none">
+                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-gray-300"></i>
+                        <p>${t.txtEmpty}</p>
+                    </div>`;
+                return;
+            }
+
+            // Separate entries by person
+            const danteEntries = filtered.filter(e => e.person === 'Dante');
+            const leoEntries = filtered.filter(e => e.person === 'Leonardo');
+
+            const buildTableHtml = (personName, personEntries, colorClass, bgClass) => {
+                if (personEntries.length === 0) return '';
                 
-                filtered.forEach(e => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition-colors group';
-                    row.innerHTML = `
+                const total = personEntries.reduce((sum, e) => sum + e.value, 0);
+                
+                let rowsHtml = personEntries.map(e => `
+                    <tr class="hover:bg-gray-50 transition-colors group">
                         <td class="p-4 whitespace-nowrap">${formatDate(e.date)}</td>
-                        <td class="p-4">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium ${e.person === 'Dante' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}">
-                                ${e.person}
-                            </span>
-                        </td>
-                        <td class="p-4 font-medium text-gray-900">${e.project}</td>
-                        <td class="p-4 text-right font-semibold text-gray-900">${formatCurrency(e.value)}</td>
+                        <td class="p-4 font-medium text-gray-900 w-full">${e.project}</td>
+                        <td class="p-4 text-right font-semibold text-gray-900 whitespace-nowrap">${formatCurrency(e.value)}</td>
                         <td class="p-4 text-center no-print whitespace-nowrap">
                             <button onclick="window.editEntry('${e.id}')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-md transition-colors mr-2" title="Edit">
                                 <i class="fa-solid fa-pen"></i>
@@ -722,10 +680,53 @@
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
+                    </tr>
+                `).join('');
+
+                return `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden print-shadow-none page-break-avoid">
+                        <div class="${bgClass} p-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-bold ${colorClass} flex items-center gap-2">
+                                <i class="fa-solid fa-file-invoice-dollar"></i> ${personName} - ${t.lblLedger} (${window.selectedYear})
+                            </h3>
+                            <span class="font-bold text-gray-800 bg-white px-3 py-1 rounded-lg border border-gray-200 shadow-sm">
+                                ${t.lblTotal}: ${formatCurrency(total)}
+                            </span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider border-b border-gray-200">
+                                        <th class="p-4 font-semibold w-32">${t.colDate}</th>
+                                        <th class="p-4 font-semibold">${t.colProject}</th>
+                                        <th class="p-4 font-semibold text-right w-40">${t.colValue}</th>
+                                        <th class="p-4 font-semibold text-center no-print w-32">${t.colActions}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 text-gray-700 text-sm">
+                                    ${rowsHtml}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-gray-50 border-t-2 border-gray-200">
+                                        <td colspan="2" class="p-4 text-right font-bold text-gray-600 uppercase tracking-wider text-sm">
+                                            ${t.lblTotal} ${personName}
+                                        </td>
+                                        <td class="p-4 text-right font-bold text-gray-900 text-base">
+                                            ${formatCurrency(total)}
+                                        </td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Render tables (Dante first, then Leonardo)
+            container.innerHTML = 
+                buildTableHtml('Dante', danteEntries, 'text-blue-800', 'bg-blue-50') + 
+                buildTableHtml('Leonardo', leoEntries, 'text-emerald-800', 'bg-emerald-50');
         };
 
         const updateDashboard = () => {
