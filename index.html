@@ -44,12 +44,71 @@
         .hidden-loader { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col relative">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col relative overflow-hidden">
 
     <!-- Loading Overlay -->
-    <div id="loader" class="fixed inset-0 bg-white/80 z-50 justify-center items-center flex-col gap-4 backdrop-blur-sm hidden-loader">
+    <div id="loader" class="fixed inset-0 bg-white/90 z-[60] justify-center items-center flex-col gap-4 backdrop-blur-sm hidden-loader">
         <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-600"></i>
         <p class="text-brand-900 font-medium tracking-wide animate-pulse" id="txtLoading">Connecting to Cloud...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 bg-gray-100 z-50 flex justify-center items-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full mx-4 border border-gray-100">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900" id="lblLoginTitle">Secure Login</h2>
+                <p class="text-gray-500 text-sm mt-1" id="lblLoginSub">D&L Financial Dashboard</p>
+            </div>
+            
+            <form id="loginForm" class="flex flex-col gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" id="lblEmail">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-regular fa-envelope"></i>
+                        </div>
+                        <input type="email" id="loginEmail" class="w-full pl-10 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" required placeholder="name@company.com">
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-gray-700" id="lblPassword">Password</label>
+                        <button type="button" onclick="window.resetPassword(event)" class="text-xs text-brand-600 hover:text-brand-800 font-medium" id="lblForgotPwd" tabindex="-1">Forgot Password?</button>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <input type="password" id="loginPassword" class="w-full pl-10 pr-10 p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" required placeholder="••••••••">
+                        <button type="button" onclick="window.togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none" tabindex="-1">
+                            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loginError" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="txtLoginError">Invalid credentials.</span>
+                </div>
+
+                <div id="loginSuccess" class="hidden bg-emerald-50 text-emerald-600 p-3 rounded-lg text-sm border border-emerald-100 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="txtLoginSuccess">Password reset email sent!</span>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md mt-2" id="btnLoginBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 flex justify-center gap-4 border-t pt-6">
+                <button onclick="window.setLanguage('en')" class="text-2xl hover:scale-110 transition-transform opacity-100" id="btnLoginEn" title="English">🇺🇸</button>
+                <button onclick="window.setLanguage('pt')" class="text-2xl hover:scale-110 transition-transform opacity-50" id="btnLoginPt" title="Português">🇧🇷</button>
+            </div>
+        </div>
     </div>
 
     <!-- Navbar -->
@@ -58,11 +117,16 @@
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-chart-line text-2xl text-brand-500"></i>
-                    <h1 id="appTitle" class="text-xl font-bold tracking-tight">D&L Financial - 1099 Consolidated</h1>
+                    <h1 id="appTitle" class="text-xl font-bold tracking-tight hidden sm:block">D&L Financial - 1099 Consolidated</h1>
+                    <h1 class="text-xl font-bold tracking-tight sm:hidden">D&L Financial</h1>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-4 items-center">
                     <button onclick="window.setLanguage('en')" class="text-2xl hover:scale-110 transition-transform" id="btnEn" title="English">🇺🇸</button>
                     <button onclick="window.setLanguage('pt')" class="text-2xl hover:scale-110 transition-transform opacity-50 hover:opacity-100" id="btnPt" title="Português">🇧🇷</button>
+                    <div class="w-px h-6 bg-brand-700 mx-2"></div>
+                    <button onclick="window.logout()" class="text-brand-100 hover:text-white transition-colors flex items-center gap-2 bg-brand-800 hover:bg-red-600 px-3 py-1.5 rounded-lg text-sm font-medium" id="btnLogout">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline" id="txtLogout">Logout</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -155,7 +219,7 @@
 
                 <div class="md:col-span-5 flex gap-3 mt-2 flex-wrap">
                     <button type="submit" id="btnAdd" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> <span id="txtAdd">Save to Cloud</span>
+                        <i class="fa-solid fa-plus" id="iconAdd"></i> <span id="txtAdd">Add Entry</span>
                     </button>
                     <button type="button" id="btnAddBoth" onclick="window.addForBoth()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-user-group"></i> <span id="txtAddBoth">Add for Both</span>
@@ -208,25 +272,25 @@
     <!-- FIREBASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Import added Email/Password Auth functions and signInAnonymously
+        import { getAuth, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, signInWithCustomToken, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // ⚠️ ATENÇÃO: SUBSTITUA O CÓDIGO ABAIXO PELO SEU QUANDO FOR PARA O GITHUB
+        // CONFIGURAÇÃO OFICIAL DO SEU FIREBASE
         // =========================================================================
         let firebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
-            // Isso permite rodar direto aqui na tela de pré-visualização da IA
             firebaseConfig = JSON.parse(__firebase_config);
         } else {
-            // QUANDO SUBIR PARA O GITHUB, COLOQUE SUAS CHAVES AQUI:
+            // Suas chaves oficiais de produção (GitHub):
             firebaseConfig = {
-                apiKey: "COLE_SUA_API_KEY_AQUI",
-                authDomain: "COLE_SEU_AUTH_DOMAIN_AQUI",
-                projectId: "COLE_SEU_PROJECT_ID_AQUI",
-                storageBucket: "COLE_SEU_STORAGE_BUCKET_AQUI",
-                messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
-                appId: "COLE_SEU_APP_ID_AQUI"
+                apiKey: "AIzaSyAN2Sf122IMVeW29bAj4Lt3dZPRUFVNZew",
+                authDomain: "dl-financial.firebaseapp.com",
+                projectId: "dl-financial",
+                storageBucket: "dl-financial.firebasestorage.app",
+                messagingSenderId: "242243370344",
+                appId: "1:242243370344:web:9a234b62ad604702bb6add"
             };
         }
         // =========================================================================
@@ -235,12 +299,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Define Collection Path based on environment
         let colRef;
         if (typeof __app_id !== 'undefined') {
             colRef = collection(db, 'artifacts', __app_id, 'public', 'data', 'dl_financials');
         } else {
-            // Path real no seu Firebase:
             colRef = collection(db, 'dl_financials');
         }
 
@@ -257,76 +319,180 @@
                 appTitle: "D&L Financial - 1099 Consolidated", lblDanteTotal: "Dante Total", lblLeoTotal: "Leonardo Total", lblCombinedTotal: "Combined Total",
                 lblChartComparison: "Revenue Comparison", lblChartTrend: "Revenue Trend (Current Year)", lblNewEntry: "New Entry / Edit",
                 lblPerson: "Person", lblValue: "Value ($)", lblProject: "Project / Client", lblDate: "Date",
-                txtAdd: "Save to Cloud", txtUpdate: "Update in Cloud", txtAddBoth: "Add for Both", txtCancel: "Cancel", txtSearch: "Search records...",
-                txtReport: "Generate Report (PDF)", colDate: "Date", colPerson: "Person", colProject: "Project", colValue: "Value", colActions: "Actions", txtEmpty: "No entries found in Cloud."
+                txtAdd: "Add Entry", txtUpdate: "Update Entry", txtAddBoth: "Add for Both", txtCancel: "Cancel", txtSearch: "Search records...",
+                txtReport: "Generate Report (PDF)", colDate: "Date", colPerson: "Person", colProject: "Project", colValue: "Value", colActions: "Actions", txtEmpty: "No entries found in Cloud.",
+                lblLoginTitle: "Secure Login", lblLoginSub: "D&L Financial Dashboard", lblEmail: "Email Address", lblPassword: "Password", btnLoginBtn: "Sign In", txtLoginError: "Invalid email or password.", txtLogout: "Logout", txtLoading: "Connecting to Cloud...",
+                lblForgotPwd: "Forgot Password?", txtResetSent: "Password reset email sent! Check your inbox.", txtEnterEmail: "Please enter your email address first."
             },
             pt: {
                 appTitle: "Financeiro D&L - Consolidado 1099", lblDanteTotal: "Total Dante", lblLeoTotal: "Total Leonardo", lblCombinedTotal: "Total Combinado",
                 lblChartComparison: "Comparativo de Receitas", lblChartTrend: "Tendência de Receitas (Ano Atual)", lblNewEntry: "Novo Lançamento / Editar",
                 lblPerson: "Pessoa", lblValue: "Valor ($)", lblProject: "Projeto / Cliente", lblDate: "Data",
-                txtAdd: "Salvar na Nuvem", txtUpdate: "Atualizar", txtAddBoth: "Para Ambos", txtCancel: "Cancelar", txtSearch: "Buscar lançamentos...",
-                txtReport: "Gerar Relatório (PDF)", colDate: "Data", colPerson: "Pessoa", colProject: "Projeto", colValue: "Valor", colActions: "Ações", txtEmpty: "Nenhum lançamento encontrado na Nuvem."
+                txtAdd: "Adicionar", txtUpdate: "Atualizar", txtAddBoth: "Para Ambos", txtCancel: "Cancelar", txtSearch: "Buscar lançamentos...",
+                txtReport: "Gerar Relatório (PDF)", colDate: "Data", colPerson: "Pessoa", colProject: "Projeto", colValue: "Valor", colActions: "Ações", txtEmpty: "Nenhum lançamento encontrado na Nuvem.",
+                lblLoginTitle: "Acesso Seguro", lblLoginSub: "Painel Financeiro D&L", lblEmail: "Endereço de E-mail", lblPassword: "Senha", btnLoginBtn: "Entrar", txtLoginError: "E-mail ou senha inválidos.", txtLogout: "Sair", txtLoading: "Conectando à Nuvem...",
+                lblForgotPwd: "Esqueceu a senha?", txtResetSent: "E-mail de recuperação enviado! Verifique sua caixa de entrada.", txtEnterEmail: "Por favor, digite seu e-mail primeiro."
             }
         };
 
-        // Initialize Authentication
-        const initAuth = async () => {
-            document.getElementById('loader').classList.remove('hidden-loader');
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch(error) {
-                console.error("Auth failed:", error);
-                alert("Authentication failed. Check your Firebase Config.");
-                document.getElementById('loader').classList.add('hidden-loader');
-            }
-        };
+        // --- AUTHENTICATION LOGIC ---
 
-        // Listen for Auth changes and load data
+        // Listen for Auth changes
         onAuthStateChanged(auth, (user) => {
-            if (!user) return;
-            
-            if (unsubscribeSnapshot) unsubscribeSnapshot();
-            
-            // Listen to Realtime Cloud Updates
-            unsubscribeSnapshot = onSnapshot(colRef, 
-                (snapshot) => {
-                    entries = [];
-                    snapshot.forEach((doc) => {
-                        entries.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    document.getElementById('loader').classList.add('hidden-loader');
-                    updateUI(); // Refreshes table and charts with new data
-                }, 
-                (error) => {
-                    console.error("Firestore error:", error);
-                    document.getElementById('loader').classList.add('hidden-loader');
+            if (user) {
+                // Logged IN
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                document.getElementById('loader').classList.remove('hidden-loader');
+                
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                
+                // Listen to Realtime Cloud Updates
+                unsubscribeSnapshot = onSnapshot(colRef, 
+                    (snapshot) => {
+                        entries = [];
+                        snapshot.forEach((doc) => {
+                            entries.push({ id: doc.id, ...doc.data() });
+                        });
+                        document.getElementById('loader').classList.add('hidden-loader');
+                        updateUI(); 
+                    }, 
+                    (error) => {
+                        console.error("Firestore error:", error);
+                        document.getElementById('loader').classList.add('hidden-loader');
+                    }
+                );
+            } else {
+                // Logged OUT
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                document.getElementById('loader').classList.add('hidden-loader');
+                
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
                 }
-            );
+                
+                // Clear UI data securely
+                entries = [];
+                updateDashboard();
+                window.renderTable();
+            }
         });
 
-        // Start Auth when page loads
-        document.addEventListener('DOMContentLoaded', () => {
+        // Handle Login Form Submit
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorBox = document.getElementById('loginError');
+            const successBox = document.getElementById('loginSuccess');
+            
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+            document.getElementById('loader').classList.remove('hidden-loader');
+
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    // Bypass para o ambiente de preview da IA: O banco de dados temporário 
+                    // da pré-visualização não tem o Login por Email ativado, então simulamos.
+                    await signInAnonymously(auth);
+                } else {
+                    // Ambiente Real de Produção (GitHub): Utiliza a senha que você configurou.
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                document.getElementById('loginForm').reset();
+            } catch (error) {
+                document.getElementById('loader').classList.add('hidden-loader');
+                errorBox.classList.remove('hidden');
+                document.getElementById('txtLoginError').innerText = i18n[currentLang].txtLoginError;
+                console.error("Login failed:", error.code);
+            }
+        });
+
+        // Toggle Password Visibility
+        window.togglePassword = () => {
+            const pwdInput = document.getElementById('loginPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        };
+
+        // Password Reset Function
+        window.resetPassword = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const errorBox = document.getElementById('loginError');
+            const successBox = document.getElementById('loginSuccess');
+            
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            if (!email) {
+                document.getElementById('txtLoginError').innerText = i18n[currentLang].txtEnterEmail;
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('loader').classList.remove('hidden-loader');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                document.getElementById('loader').classList.add('hidden-loader');
+                document.getElementById('txtLoginSuccess').innerText = i18n[currentLang].txtResetSent;
+                successBox.classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('loader').classList.add('hidden-loader');
+                document.getElementById('txtLoginError').innerText = "Erro: " + error.message;
+                errorBox.classList.remove('hidden');
+                console.error("Reset failed:", error);
+            }
+        };
+
+        // Global Logout Function
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('date').valueAsDate = new Date();
-            initAuth();
+            
+            // Auto-login logic for AI preview environment only
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                try { await signInWithCustomToken(auth, __initial_auth_token); } catch(e) {}
+            }
+            
             updateUI();
         });
 
-        // --- GLOBAL FUNCTIONS (attached to window to be called from HTML) ---
+        // --- GLOBAL FUNCTIONS & UI ---
         
         window.setLanguage = (lang) => {
             currentLang = lang;
+            
+            // Dashboard flags
             document.getElementById('btnEn').classList.replace(lang === 'en' ? 'opacity-50' : 'opacity-100', lang === 'en' ? 'opacity-100' : 'opacity-50');
             document.getElementById('btnPt').classList.replace(lang === 'pt' ? 'opacity-50' : 'opacity-100', lang === 'pt' ? 'opacity-100' : 'opacity-50');
+            
+            // Login flags
+            document.getElementById('btnLoginEn').classList.replace(lang === 'en' ? 'opacity-50' : 'opacity-100', lang === 'en' ? 'opacity-100' : 'opacity-50');
+            document.getElementById('btnLoginPt').classList.replace(lang === 'pt' ? 'opacity-50' : 'opacity-100', lang === 'pt' ? 'opacity-100' : 'opacity-50');
+            
             updateUI();
         };
 
         const updateUI = () => {
             const t = i18n[currentLang];
+            // Main App
             document.getElementById('appTitle').innerText = t.appTitle;
             document.getElementById('lblDanteTotal').innerText = t.lblDanteTotal;
             document.getElementById('lblLeoTotal').innerText = t.lblLeoTotal;
@@ -338,9 +504,6 @@
             document.getElementById('lblValue').innerText = t.lblValue;
             document.getElementById('lblProject').innerText = t.lblProject;
             document.getElementById('lblDate').innerText = t.lblDate;
-            
-            const editId = document.getElementById('editId').value;
-            document.getElementById('txtAdd').innerText = editId ? t.txtUpdate : t.txtAdd;
             document.getElementById('txtAddBoth').innerText = t.txtAddBoth;
             document.getElementById('txtCancel').innerText = t.txtCancel;
             document.getElementById('searchInput').placeholder = t.txtSearch;
@@ -351,6 +514,20 @@
             document.getElementById('colValue').innerText = t.colValue;
             document.getElementById('colActions').innerText = t.colActions;
             document.getElementById('txtEmpty').innerText = t.txtEmpty;
+            document.getElementById('txtLogout').innerText = t.txtLogout;
+            document.getElementById('txtLoading').innerText = t.txtLoading;
+            
+            const editId = document.getElementById('editId').value;
+            document.getElementById('txtAdd').innerText = editId ? t.txtUpdate : t.txtAdd;
+
+            // Login Screen
+            document.getElementById('lblLoginTitle').innerText = t.lblLoginTitle;
+            document.getElementById('lblLoginSub').innerText = t.lblLoginSub;
+            document.getElementById('lblEmail').innerText = t.lblEmail;
+            document.getElementById('lblPassword').innerText = t.lblPassword;
+            document.getElementById('btnLoginBtn').innerText = t.btnLoginBtn;
+            document.getElementById('txtLoginError').innerText = t.txtLoginError;
+            document.getElementById('lblForgotPwd').innerText = t.lblForgotPwd;
 
             window.renderTable();
             updateDashboard();
@@ -424,6 +601,7 @@
             document.getElementById('date').value = entry.date;
 
             document.getElementById('txtAdd').innerText = i18n[currentLang].txtUpdate;
+            document.getElementById('iconAdd').classList.replace('fa-plus', 'fa-pen');
             document.getElementById('btnAddBoth').classList.add('hidden');
             document.getElementById('btnCancel').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -445,6 +623,7 @@
             document.getElementById('editId').value = '';
             document.getElementById('date').valueAsDate = new Date();
             document.getElementById('txtAdd').innerText = i18n[currentLang].txtAdd;
+            document.getElementById('iconAdd').classList.replace('fa-pen', 'fa-plus');
             document.getElementById('btnAddBoth').classList.remove('hidden');
             document.getElementById('btnCancel').classList.add('hidden');
         };
@@ -454,7 +633,6 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            // Sort by Date Descending
             const sortedEntries = [...entries].sort((a, b) => {
                 const dateDiff = new Date(b.date) - new Date(a.date);
                 return dateDiff === 0 ? b.timestamp - a.timestamp : dateDiff;
