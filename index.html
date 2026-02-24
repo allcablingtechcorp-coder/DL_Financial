@@ -105,8 +105,12 @@
             </form>
 
             <div class="mt-6 flex justify-center gap-4 border-t pt-6">
-                <button onclick="window.setLanguage('en')" class="text-2xl hover:scale-110 transition-transform opacity-100" id="btnLoginEn" title="English">🇺🇸</button>
-                <button onclick="window.setLanguage('pt')" class="text-2xl hover:scale-110 transition-transform opacity-50" id="btnLoginPt" title="Português">🇧🇷</button>
+                <button onclick="window.setLanguage('en')" class="hover:scale-110 transition-transform opacity-100" id="btnLoginEn" title="English">
+                    <img src="https://flagcdn.com/w40/us.png" alt="USA" class="w-8 h-5 rounded-sm shadow-sm border border-gray-200">
+                </button>
+                <button onclick="window.setLanguage('pt')" class="hover:scale-110 transition-transform opacity-50" id="btnLoginPt" title="Português">
+                    <img src="https://flagcdn.com/w40/br.png" alt="Brazil" class="w-8 h-5 rounded-sm shadow-sm border border-gray-200">
+                </button>
             </div>
         </div>
     </div>
@@ -121,8 +125,12 @@
                     <h1 class="text-xl font-bold tracking-tight sm:hidden">D&L Financial</h1>
                 </div>
                 <div class="flex gap-4 items-center">
-                    <button onclick="window.setLanguage('en')" class="text-2xl hover:scale-110 transition-transform" id="btnEn" title="English">🇺🇸</button>
-                    <button onclick="window.setLanguage('pt')" class="text-2xl hover:scale-110 transition-transform opacity-50 hover:opacity-100" id="btnPt" title="Português">🇧🇷</button>
+                    <button onclick="window.setLanguage('en')" class="hover:scale-110 transition-transform" id="btnEn" title="English">
+                        <img src="https://flagcdn.com/w40/us.png" alt="USA" class="w-8 h-5 rounded-sm shadow-sm border border-brand-800">
+                    </button>
+                    <button onclick="window.setLanguage('pt')" class="hover:scale-110 transition-transform opacity-50 hover:opacity-100" id="btnPt" title="Português">
+                        <img src="https://flagcdn.com/w40/br.png" alt="Brazil" class="w-8 h-5 rounded-sm shadow-sm border border-brand-800">
+                    </button>
                     <div class="w-px h-6 bg-brand-700 mx-2"></div>
                     <button onclick="window.logout()" class="text-brand-100 hover:text-white transition-colors flex items-center gap-2 bg-brand-800 hover:bg-red-600 px-3 py-1.5 rounded-lg text-sm font-medium" id="btnLogout">
                         <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline" id="txtLogout">Logout</span>
