@@ -135,6 +135,17 @@
     <!-- Main Content -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         
+        <!-- Dashboard Header & Year Filter -->
+        <div class="flex justify-between items-end mb-4 no-print">
+            <h2 class="text-xl font-bold text-gray-800" id="lblDashboardOverview">Dashboard Overview</h2>
+            <div class="flex items-center gap-2">
+                <label for="yearFilter" class="text-sm font-medium text-gray-600" id="lblYearFilter">Year:</label>
+                <select id="yearFilter" onchange="window.changeYear()" class="p-2 pr-8 bg-white border border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 outline-none shadow-sm cursor-pointer font-medium text-gray-700">
+                    <!-- Options injected via JS -->
+                </select>
+            </div>
+        </div>
+
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 print-shadow-none flex items-center gap-4">
@@ -312,26 +323,29 @@
         let compChartInstance = null;
         let trendChartInstance = null;
         let unsubscribeSnapshot = null;
+        window.selectedYear = new Date().getFullYear();
 
         // I18N
         const i18n = {
             en: {
                 appTitle: "D&L Financial - 1099 Consolidated", lblDanteTotal: "Dante Total", lblLeoTotal: "Leonardo Total", lblCombinedTotal: "Combined Total",
-                lblChartComparison: "Revenue Comparison", lblChartTrend: "Revenue Trend (Current Year)", lblNewEntry: "New Entry / Edit",
+                lblChartComparison: "Revenue Comparison", lblChartTrend: "Revenue Trend", lblNewEntry: "New Entry / Edit",
                 lblPerson: "Person", lblValue: "Value ($)", lblProject: "Project / Client", lblDate: "Date",
                 txtAdd: "Add Entry", txtUpdate: "Update Entry", txtAddBoth: "Add for Both", txtCancel: "Cancel", txtSearch: "Search records...",
                 txtReport: "Generate Report (PDF)", colDate: "Date", colPerson: "Person", colProject: "Project", colValue: "Value", colActions: "Actions", txtEmpty: "No entries found in Cloud.",
                 lblLoginTitle: "Secure Login", lblLoginSub: "D&L Financial Dashboard", lblEmail: "Email Address", lblPassword: "Password", btnLoginBtn: "Sign In", txtLoginError: "Invalid email or password.", txtLogout: "Logout", txtLoading: "Connecting to Cloud...",
-                lblForgotPwd: "Forgot Password?", txtResetSent: "Password reset email sent! Check your inbox.", txtEnterEmail: "Please enter your email address first."
+                lblForgotPwd: "Forgot Password?", txtResetSent: "Password reset email sent! Check your inbox.", txtEnterEmail: "Please enter your email address first.",
+                lblDashboardOverview: "Dashboard Overview", lblYearFilter: "Year:"
             },
             pt: {
                 appTitle: "Financeiro D&L - Consolidado 1099", lblDanteTotal: "Total Dante", lblLeoTotal: "Total Leonardo", lblCombinedTotal: "Total Combinado",
-                lblChartComparison: "Comparativo de Receitas", lblChartTrend: "Tendência de Receitas (Ano Atual)", lblNewEntry: "Novo Lançamento / Editar",
+                lblChartComparison: "Comparativo de Receitas", lblChartTrend: "Tendência de Receitas", lblNewEntry: "Novo Lançamento / Editar",
                 lblPerson: "Pessoa", lblValue: "Valor ($)", lblProject: "Projeto / Cliente", lblDate: "Data",
                 txtAdd: "Adicionar", txtUpdate: "Atualizar", txtAddBoth: "Para Ambos", txtCancel: "Cancelar", txtSearch: "Buscar lançamentos...",
                 txtReport: "Gerar Relatório (PDF)", colDate: "Data", colPerson: "Pessoa", colProject: "Projeto", colValue: "Valor", colActions: "Ações", txtEmpty: "Nenhum lançamento encontrado na Nuvem.",
                 lblLoginTitle: "Acesso Seguro", lblLoginSub: "Painel Financeiro D&L", lblEmail: "Endereço de E-mail", lblPassword: "Senha", btnLoginBtn: "Entrar", txtLoginError: "E-mail ou senha inválidos.", txtLogout: "Sair", txtLoading: "Conectando à Nuvem...",
-                lblForgotPwd: "Esqueceu a senha?", txtResetSent: "E-mail de recuperação enviado! Verifique sua caixa de entrada.", txtEnterEmail: "Por favor, digite seu e-mail primeiro."
+                lblForgotPwd: "Esqueceu a senha?", txtResetSent: "E-mail de recuperação enviado! Verifique sua caixa de entrada.", txtEnterEmail: "Por favor, digite seu e-mail primeiro.",
+                lblDashboardOverview: "Visão Geral do Painel", lblYearFilter: "Ano:"
             }
         };
 
@@ -355,6 +369,7 @@
                             entries.push({ id: doc.id, ...doc.data() });
                         });
                         document.getElementById('loader').classList.add('hidden-loader');
+                        window.updateYearOptions();
                         updateUI(); 
                     }, 
                     (error) => {
@@ -471,11 +486,37 @@
                 try { await signInWithCustomToken(auth, __initial_auth_token); } catch(e) {}
             }
             
+            window.updateYearOptions();
             updateUI();
         });
 
         // --- GLOBAL FUNCTIONS & UI ---
         
+        window.updateYearOptions = () => {
+            const yearSelect = document.getElementById('yearFilter');
+            if(!yearSelect) return;
+            const years = new Set(entries.map(e => new Date(e.date).getFullYear()));
+            years.add(new Date().getFullYear()); // Always include current year
+            
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            yearSelect.innerHTML = '';
+            sortedYears.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.innerText = y;
+                if (y === window.selectedYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            });
+            if (!sortedYears.includes(window.selectedYear)) {
+                window.selectedYear = sortedYears[0];
+            }
+        };
+
+        window.changeYear = () => {
+            window.selectedYear = parseInt(document.getElementById('yearFilter').value);
+            updateUI();
+        };
+
         window.setLanguage = (lang) => {
             currentLang = lang;
             
@@ -494,11 +535,13 @@
             const t = i18n[currentLang];
             // Main App
             document.getElementById('appTitle').innerText = t.appTitle;
+            document.getElementById('lblDashboardOverview').innerText = t.lblDashboardOverview;
+            document.getElementById('lblYearFilter').innerText = t.lblYearFilter;
             document.getElementById('lblDanteTotal').innerText = t.lblDanteTotal;
             document.getElementById('lblLeoTotal').innerText = t.lblLeoTotal;
             document.getElementById('lblCombinedTotal').innerText = t.lblCombinedTotal;
             document.getElementById('lblChartComparison').innerText = t.lblChartComparison;
-            document.getElementById('lblChartTrend').innerText = t.lblChartTrend;
+            document.getElementById('lblChartTrend').innerText = `${t.lblChartTrend} (${window.selectedYear})`;
             document.getElementById('lblNewEntry').innerText = t.lblNewEntry;
             document.getElementById('lblPerson').innerText = t.lblPerson;
             document.getElementById('lblValue').innerText = t.lblValue;
@@ -638,11 +681,13 @@
                 return dateDiff === 0 ? b.timestamp - a.timestamp : dateDiff;
             });
             
-            const filtered = sortedEntries.filter(e => 
-                (e.project || '').toLowerCase().includes(queryStr) || 
-                (e.person || '').toLowerCase().includes(queryStr) ||
-                (e.date || '').includes(queryStr)
-            );
+            const filtered = sortedEntries.filter(e => {
+                const matchesSearch = (e.project || '').toLowerCase().includes(queryStr) || 
+                                      (e.person || '').toLowerCase().includes(queryStr) ||
+                                      (e.date || '').includes(queryStr);
+                const matchesYear = new Date(e.date).getFullYear() === window.selectedYear;
+                return matchesSearch && matchesYear;
+            });
 
             if(filtered.length === 0) {
                 document.getElementById('emptyState').classList.remove('hidden');
@@ -677,7 +722,9 @@
 
         const updateDashboard = () => {
             let totalDante = 0, totalLeo = 0;
-            entries.forEach(e => {
+            const yearEntries = entries.filter(e => new Date(e.date).getFullYear() === window.selectedYear);
+
+            yearEntries.forEach(e => {
                 if(e.person === 'Dante') totalDante += e.value;
                 if(e.person === 'Leonardo') totalLeo += e.value;
             });
@@ -686,10 +733,10 @@
             document.getElementById('valLeoTotal').innerText = formatCurrency(totalLeo);
             document.getElementById('valCombinedTotal').innerText = formatCurrency(totalDante + totalLeo);
 
-            renderCharts(totalDante, totalLeo);
+            renderCharts(yearEntries, totalDante, totalLeo);
         };
 
-        const renderCharts = (danteTotal, leoTotal) => {
+        const renderCharts = (yearEntries, danteTotal, leoTotal) => {
             const ctxComp = document.getElementById('comparisonChart').getContext('2d');
             if (compChartInstance) compChartInstance.destroy();
             compChartInstance = new Chart(ctxComp, {
@@ -705,11 +752,9 @@
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             months.forEach(m => { monthlyData.Dante[m] = 0; monthlyData.Leonardo[m] = 0; });
 
-            entries.forEach(e => {
+            yearEntries.forEach(e => {
                 const date = new Date(e.date);
-                if(date.getFullYear() === new Date().getFullYear()) {
-                    monthlyData[e.person][months[date.getMonth()]] += e.value;
-                }
+                monthlyData[e.person][months[date.getMonth()]] += e.value;
             });
 
             const ctxTrend = document.getElementById('trendChart').getContext('2d');
